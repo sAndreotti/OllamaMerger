@@ -66,10 +66,10 @@ ruff check src
 ## Roadmap
 
 - [x] Project scaffolding
-- [ ] MVP: download + Modelfile generation
-- [ ] Interactive CLI
-- [ ] Docker + Web UI
-- [ ] CI/CD pipeline
+- [x] MVP: download + Modelfile generation
+- [x] Interactive CLI
+- [x] Docker + Web UI
+- [x] CI/CD pipeline
 
 ## License
 

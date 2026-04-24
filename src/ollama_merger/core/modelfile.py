@@ -70,7 +70,7 @@ def generate_modelfile(model_dir: Path, system_prompt: str | None = None) -> str
     Returns:
         The Modelfile content as a string.
     """
-    lines = ['FROM .']
+    lines = ["FROM ."]
 
     # Read metadata files
     config = _read_json(model_dir / "config.json")
