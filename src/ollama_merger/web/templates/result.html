@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Conversion Result</h1>
+
+{% if success %}
+<div class="card">
+    <p class="success">Model converted successfully!</p>
+    <p><strong>Model:</strong> {{ model_id }}</p>
+    <p><strong>Directory:</strong> {{ model_dir }}</p>
+    <p><strong>Modelfile:</strong> {{ modelfile_path }}</p>
+</div>
+
+<div class="card">
+    <label>Generated Modelfile:</label>
+    <pre>{{ modelfile_content }}</pre>
+</div>
+
+<div class="card">
+    <h3>Import into Ollama</h3>
+    <form action="/create" method="post" style="margin-top: 1rem;">
+        <input type="hidden" name="model_dir" value="{{ model_dir }}">
+        <label for="model_name">Model Name</label>
+        <input type="text" id="model_name" name="model_name" value="{{ model_name }}">
+        <button type="submit">Create Ollama Model</button>
+    </form>
+</div>
+{% else %}
+<div class="card">
+    <p class="error">Conversion failed</p>
+    <pre>{{ error }}</pre>
+</div>
+{% endif %}
+
+<a href="/" class="back">&larr; Back</a>
+{% endblock %}
