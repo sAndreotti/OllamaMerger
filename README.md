@@ -1,6 +1,6 @@
 # OllamaMerger
 
-[![CI](https://github.com/sAndreotti/OllamaMerger/actions/workflows/ci.yml/badge.svg)](https://github.com/sAndreotti/OllamaMerger/actions/workflows/ci.yml)
+[![CI](https://github.com/sAndreotti/OllamaMerger/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sAndreotti/OllamaMerger/actions/workflows/ci.yml)
 
 Convert HuggingFace models to Ollama-ready format with a single command.
 
