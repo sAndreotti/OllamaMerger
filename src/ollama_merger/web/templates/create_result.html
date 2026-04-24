@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Ollama Create Result</h1>
+
+<div class="card">
+    {% if success %}
+    <p class="success">Model "{{ model_name }}" created successfully!</p>
+    <pre>{{ output }}</pre>
+    <p style="margin-top: 1rem;">Run it with: <code>ollama run {{ model_name }}</code></p>
+    {% else %}
+    <p class="error">Failed to create model "{{ model_name }}"</p>
+    <pre>{{ output }}</pre>
+    {% endif %}
+</div>
+
+<a href="/" class="back">&larr; Back</a>
+{% endblock %}

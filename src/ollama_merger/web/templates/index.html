@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>OllamaMerger</h1>
+<p class="subtitle">Convert HuggingFace models to Ollama-ready format</p>
+
+<form action="/convert" method="post">
+    <div class="card">
+        <label for="url">HuggingFace Model URL or ID</label>
+        <input type="text" id="url" name="url" placeholder="mistralai/Mistral-7B-v0.1" required>
+
+        <label for="revision">Revision (optional)</label>
+        <input type="text" id="revision" name="revision" placeholder="main">
+
+        <label for="system_prompt">System Prompt (optional)</label>
+        <textarea id="system_prompt" name="system_prompt" placeholder="You are a helpful assistant."></textarea>
+
+        <button type="submit">Convert</button>
+    </div>
+</form>
+{% endblock %}
