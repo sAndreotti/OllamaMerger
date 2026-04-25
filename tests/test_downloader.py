@@ -15,6 +15,7 @@ class TestDownloadModel:
 
         assert result == tmp_path / "Mistral-7B-v0.1"
 
+    @patch.dict("os.environ", {}, clear=True)
     @patch("ollama_merger.core.downloader.snapshot_download")
     def test_download_passes_correct_patterns(self, mock_download, tmp_path):
         download_model("mistralai/Mistral-7B-v0.1", tmp_path)
@@ -24,8 +25,10 @@ class TestDownloadModel:
             local_dir=str(tmp_path / "Mistral-7B-v0.1"),
             revision=None,
             allow_patterns=ALLOW_PATTERNS,
+            token=None,
         )
 
+    @patch.dict("os.environ", {}, clear=True)
     @patch("ollama_merger.core.downloader.snapshot_download")
     def test_download_with_revision(self, mock_download, tmp_path):
         download_model("mistralai/Mistral-7B-v0.1", tmp_path, revision="v2")
@@ -35,6 +38,20 @@ class TestDownloadModel:
             local_dir=str(tmp_path / "Mistral-7B-v0.1"),
             revision="v2",
             allow_patterns=ALLOW_PATTERNS,
+            token=None,
+        )
+
+    @patch.dict("os.environ", {"HF_TOKEN": "hf_test_token_123"})
+    @patch("ollama_merger.core.downloader.snapshot_download")
+    def test_download_passes_hf_token(self, mock_download, tmp_path):
+        download_model("org/model", tmp_path)
+
+        mock_download.assert_called_once_with(
+            repo_id="org/model",
+            local_dir=str(tmp_path / "model"),
+            revision=None,
+            allow_patterns=ALLOW_PATTERNS,
+            token="hf_test_token_123",
         )
 
     def test_allow_patterns_includes_safetensors(self):
