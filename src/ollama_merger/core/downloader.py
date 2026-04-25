@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from huggingface_hub import snapshot_download
+
+load_dotenv()
 
 ALLOW_PATTERNS = [
     "*.safetensors",
@@ -32,11 +36,14 @@ def download_model(
     Returns:
         Path to the directory containing the downloaded model files.
     """
+    token = os.environ.get("HF_TOKEN")
+
     local_dir = output_dir / model_id.split("/")[-1]
     snapshot_download(
         repo_id=model_id,
         local_dir=str(local_dir),
         revision=revision,
         allow_patterns=ALLOW_PATTERNS,
+        token=token,
     )
     return local_dir
