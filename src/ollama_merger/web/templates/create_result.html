@@ -14,5 +14,17 @@
     {% endif %}
 </div>
 
+{% if success %}
+<div class="card">
+    <h3>Push to Ollama Registry</h3>
+    <p style="margin-bottom: 1rem; color: #94a3b8;">Upload this model to your Ollama account. Make sure to use <code>username/model-name</code> format and that you are logged in via <code>ollama login</code>.</p>
+    <form action="/push" method="post">
+        <label for="model_name">Model Name (username/model)</label>
+        <input type="text" id="model_name" name="model_name" value="{{ model_name }}" placeholder="username/my-model">
+        <button type="submit">Push to Registry</button>
+    </form>
+</div>
+{% endif %}
+
 <a href="/" class="back">&larr; Back</a>
 {% endblock %}

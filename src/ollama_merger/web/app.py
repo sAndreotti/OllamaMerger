@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import subprocess
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
@@ -12,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from ollama_merger.core.downloader import download_model
 from ollama_merger.core.modelfile import generate_modelfile, write_modelfile
+from ollama_merger.core.ollama import create_model, push_model
 from ollama_merger.core.parser import parse_model_id
 
 app = FastAPI(title="OllamaMerger", description="Convert HuggingFace models to Ollama format")
@@ -79,30 +78,44 @@ async def create_ollama_model(
     model_name: str = Form(...),
 ):
     """Run ollama create to import the model."""
-    try:
-        result = await asyncio.to_thread(
-            subprocess.run,
-            ["ollama", "create", model_name, "-f", "Modelfile"],
-            cwd=model_dir,
-            capture_output=True,
-            text=True,
-            timeout=600,
-        )
-        success = result.returncode == 0
-        output = result.stdout if success else result.stderr
-    except FileNotFoundError:
-        success = False
-        output = "Ollama is not installed or not found in PATH."
-    except subprocess.TimeoutExpired:
-        success = False
-        output = "Model creation timed out (10 min limit)."
+    result = create_model(model_name, Path(model_dir))
 
     return templates.TemplateResponse(
         request,
         "create_result.html",
         {
-            "success": success,
+            "success": result.success,
             "model_name": model_name,
-            "output": output,
+            "output": result.output,
+        },
+    )
+
+
+@app.post("/push")
+async def push_ollama_model(
+    request: Request,
+    model_name: str = Form(...),
+):
+    """Push an Ollama model to the registry."""
+    if "/" not in model_name:
+        return templates.TemplateResponse(
+            request,
+            "push_result.html",
+            {
+                "success": False,
+                "model_name": model_name,
+                "output": "Model name must include your Ollama username (e.g. username/my-model).",
+            },
+        )
+
+    result = push_model(model_name)
+
+    return templates.TemplateResponse(
+        request,
+        "push_result.html",
+        {
+            "success": result.success,
+            "model_name": model_name,
+            "output": result.output,
         },
     )
