@@ -10,9 +10,11 @@ OllamaMerger automates the process of downloading SafeTensor models from Hugging
 
 - **Download** SafeTensor models and metadata from HuggingFace
 - **Generate** Ollama Modelfiles with correct parameters, templates, and system prompts
+- **Create & Push** models directly to your Ollama account
 - **Interactive CLI** to browse model variants and customize the Modelfile
 - **Web UI** for browser-based usage
 - **Docker** support for containerized deployment
+- **HF_TOKEN** support via `.env` for authenticated downloads
 
 ## Quick Start
 
@@ -41,13 +43,21 @@ ollama-merger list https://huggingface.co/mistralai/Mistral-7B-v0.1
 
 # Interactive mode with Modelfile customization
 ollama-merger convert https://huggingface.co/mistralai/Mistral-7B-v0.1 --interactive
+
+# Convert, create in Ollama, and push to your account in one step
+ollama-merger convert mistralai/Mistral-7B-v0.1 --push --name myuser/mistral-7b
+
+# Push an already created model
+ollama-merger push-cmd myuser/my-model
 ```
 
-Then import into Ollama:
+### Configuration
+
+Copy `.env.example` to `.env` and add your HuggingFace token for faster authenticated downloads:
 
 ```bash
-cd output/Mistral-7B-v0.1
-ollama create my-model -f Modelfile
+cp .env.example .env
+# Edit .env and set HF_TOKEN=hf_your_token_here
 ```
 
 ## Development
