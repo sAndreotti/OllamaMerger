@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from ollama_merger.web.app import app
@@ -53,12 +52,41 @@ class TestWebConvert:
 
 
 class TestWebCreate:
-    @patch("ollama_merger.web.app.subprocess")
-    def test_create_ollama_not_found(self, mock_subprocess):
-        mock_subprocess.run.side_effect = FileNotFoundError()
+    @patch("ollama_merger.web.app.create_model")
+    def test_create_ollama_not_found(self, mock_create):
+        from ollama_merger.core.ollama import OllamaResult
+
+        mock_create.return_value = OllamaResult(
+            success=False, output="Ollama is not installed or not found in PATH."
+        )
         response = client.post(
             "/create",
             data={"model_dir": "/tmp/test", "model_name": "test-model"},
         )
         assert response.status_code == 200
         assert "not installed" in response.text.lower() or "not found" in response.text.lower()
+
+
+class TestWebPush:
+    @patch("ollama_merger.web.app.push_model")
+    def test_push_success(self, mock_push):
+        from ollama_merger.core.ollama import OllamaResult
+
+        mock_push.return_value = OllamaResult(success=True, output="pushing manifest")
+        response = client.post("/push", data={"model_name": "user/my-model"})
+        assert response.status_code == 200
+        assert "successfully" in response.text.lower()
+
+    def test_push_requires_username(self):
+        response = client.post("/push", data={"model_name": "my-model"})
+        assert response.status_code == 200
+        assert "username" in response.text.lower()
+
+    @patch("ollama_merger.web.app.push_model")
+    def test_push_failure(self, mock_push):
+        from ollama_merger.core.ollama import OllamaResult
+
+        mock_push.return_value = OllamaResult(success=False, output="unauthorized")
+        response = client.post("/push", data={"model_name": "user/my-model"})
+        assert response.status_code == 200
+        assert "unauthorized" in response.text

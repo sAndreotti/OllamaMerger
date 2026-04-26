@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Ollama Push Result</h1>
+
+<div class="card">
+    {% if success %}
+    <p class="success">Model "{{ model_name }}" pushed successfully!</p>
+    <pre>{{ output }}</pre>
+    {% else %}
+    <p class="error">Failed to push model "{{ model_name }}"</p>
+    <pre>{{ output }}</pre>
+    {% endif %}
+</div>
+
+<a href="/" class="back">&larr; Back</a>
+{% endblock %}

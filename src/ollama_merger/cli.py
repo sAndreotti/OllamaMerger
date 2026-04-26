@@ -17,6 +17,7 @@ except ImportError:
 
 from ollama_merger.core.downloader import download_model
 from ollama_merger.core.modelfile import write_modelfile
+from ollama_merger.core.ollama import create_model, push_model
 from ollama_merger.core.parser import parse_model_id
 
 app = typer.Typer(
@@ -40,6 +41,15 @@ def convert(
     ),
     interactive: bool = typer.Option(
         False, "--interactive", "-i", help="Interactively customize the Modelfile"
+    ),
+    create: bool = typer.Option(
+        False, "--create", "-c", help="Run ollama create after generating the Modelfile"
+    ),
+    push: bool = typer.Option(
+        False, "--push", "-p", help="Push the model to your Ollama account after creating it"
+    ),
+    model_name: str | None = typer.Option(
+        None, "--name", "-n", help="Ollama model name (e.g. username/my-model). Required for --push"
     ),
 ) -> None:
     """Convert a HuggingFace model to Ollama format."""
@@ -76,15 +86,70 @@ def convert(
     modelfile_path = write_modelfile(model_dir, system_prompt=system_prompt)
     console.print(f"[green]Modelfile written to:[/green] {modelfile_path}")
 
-    # Show next steps
-    model_name = model_id.split("/")[-1].lower()
-    console.print(
-        Panel(
-            f"cd {model_dir}\nollama create {model_name} -f Modelfile",
-            title="Next steps",
-            border_style="cyan",
+    # Determine model name
+    name = model_name or model_id.split("/")[-1].lower()
+
+    # Create model in Ollama
+    if create or push:
+        console.print(f"\n[bold blue]Creating Ollama model '{name}'...[/bold blue]")
+        result = create_model(name, model_dir)
+        if not result.success:
+            console.print(f"[red]Create failed:[/red] {result.output}")
+            raise typer.Exit(1)
+        console.print(f"[green]Model '{name}' created successfully![/green]")
+        if result.output.strip():
+            console.print(f"[dim]{result.output.strip()}[/dim]")
+
+    # Push model to Ollama registry
+    if push:
+        if "/" not in name:
+            console.print(
+                "[red]Error:[/red] Model name must include your Ollama username "
+                "(e.g. username/my-model) to push. Use --name to set it."
+            )
+            raise typer.Exit(1)
+
+        console.print(f"\n[bold blue]Pushing '{name}' to Ollama registry...[/bold blue]")
+        result = push_model(name)
+        if not result.success:
+            console.print(f"[red]Push failed:[/red] {result.output}")
+            raise typer.Exit(1)
+        console.print(f"[green]Model '{name}' pushed successfully![/green]")
+        if result.output.strip():
+            console.print(f"[dim]{result.output.strip()}[/dim]")
+
+    # Show next steps if not auto-created
+    if not create and not push:
+        console.print(
+            Panel(
+                f"cd {model_dir}\nollama create {name} -f Modelfile",
+                title="Next steps",
+                border_style="cyan",
+            )
         )
-    )
+
+
+@app.command()
+def push_cmd(
+    model_name: str = typer.Argument(help="Ollama model name (e.g. username/my-model)"),
+) -> None:
+    """Push an existing Ollama model to your account on the registry."""
+    if "/" not in model_name:
+        console.print(
+            "[red]Error:[/red] Model name must include your Ollama username "
+            "(e.g. username/my-model)."
+        )
+        raise typer.Exit(1)
+
+    console.print(f"[bold blue]Pushing '{model_name}' to Ollama registry...[/bold blue]")
+    result = push_model(model_name)
+    if not result.success:
+        console.print(f"[red]Push failed:[/red] {result.output}")
+        raise typer.Exit(1)
+
+    console.print(f"[green]Model '{model_name}' pushed successfully![/green]")
+    if result.output.strip():
+        console.print(f"[dim]{result.output.strip()}[/dim]")
 
 
 @app.command()
